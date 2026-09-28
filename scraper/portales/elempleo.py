@@ -1,145 +1,60 @@
-"""
-Portal: ElEmpleo
-URL base: https://www.elempleo.com/co/trabajos/{slug}?l={ciudad}
-"""
-import time
-import random
-from datetime import datetime
-from ..filtro_robusto import extraer_salario_robusto
+import requests
+from bs4 import BeautifulSoup
+from ..utils_red import retry_with_backoff, get_base_headers
 
-def _slug(texto: str) -> str:
-    return (texto.replace(" ", "-").lower()
-            .replace("á", "a").replace("é", "e").replace("ó", "o")
-            .replace("í", "i").replace("ú", "u").replace("ñ", "n"))
-
-def buscar_elempleo(busqueda: str, ciudad: str, pw_context) -> list[dict]:
-    """
-    Busca en ElEmpleo y retorna lista de cargos crudos.
-    No da 403, ideal para sector construcción.
-    """
-    slug_b = _slug(busqueda)
-    ciudad_l = ciudad.lower()
-    if ciudad_l == "bogota":
-        ciudad_q = "Bogot%C3%A1"
-    else:
-        ciudad_q = ciudad.capitalize()
-
-    url_busqueda = f"https://www.elempleo.com/co/trabajos/{slug_b}?l={ciudad_q}"
+@retry_with_backoff(max_retries=3, base_delay=3)
+def buscar_elempleo(busqueda: str, ciudad: str) -> list[dict]:
+    slug = busqueda.lower().replace(" ", "-")
+    ciudad_slug = ciudad.lower().replace(" ", "-")
+    url = f"https://www.elempleo.com/co/ofertas-empleo/{slug}/{ciudad_slug}"
+    
+    headers = get_base_headers()
+    response = requests.get(url, headers=headers, timeout=15)
+    
+    if response.status_code == 429:
+        raise Exception("Error 429: Too Many Requests")
+    response.raise_for_status()
+    
+    soup = BeautifulSoup(response.text, "html.parser")
+    cards = soup.find_all("div", class_="result-item")
+    
     resultados = []
-
-    page = pw_context.new_page()
-    try:
-        print(f"  [EE] {url_busqueda}")
-        page.goto(url_busqueda, wait_until="domcontentloaded", timeout=60_000)
-        time.sleep(random.uniform(3, 5))
-
-        SELECTORES = [
-            "div.js-offer",
-            "a.js-offer",
-            "article",
-            "div.result-item"
-        ]
-
-        cards = []
-        for sel in SELECTORES:
-            try:
-                found = page.query_selector_all(sel)
-                if found and len(found) > 0:
-                    cards = found
-                    break
-            except Exception:
-                continue
-
-        if not cards:
-            print(f"  [EE] 0 cards encontradas en {slug_b}/{ciudad}")
-            return []
-
-        print(f"  [EE] {len(cards)} cards en {slug_b}/{ciudad}")
-
-        for card in cards[:20]:
-            try:
-                card_text = card.inner_text().strip()
-                if not card_text:
-                    continue
-
-                titulo = ""
-                for t_sel in ["h2", "h3", "a.text-ellipsis"]:
-                    try:
-                        el = card.query_selector(t_sel)
-                        if el:
-                            titulo = el.inner_text().strip()
-                            if titulo:
-                                break
-                    except Exception:
-                        pass
-                
-                if not titulo:
-                    lineas = [l.strip() for l in card_text.split("\n") if l.strip()]
-                    titulo = lineas[0][:100] if lineas else ""
-
-                empresa = "Ver en ElEmpleo"
-                try:
-                    el = card.query_selector("span.company, span.company-name")
-                    if el:
-                        empresa = el.inner_text().strip()
-                except Exception:
-                    pass
-
-                url_cargo = url_busqueda
-                try:
-                    href = ""
-                    # a.js-offer o enlace interior
-                    tag_name = card.evaluate("el => el.tagName").lower()
-                    if tag_name == "a":
-                        href = card.get_attribute("href") or ""
-                    else:
-                        a_el = card.query_selector("a.text-ellipsis")
-                        if a_el:
-                            href = a_el.get_attribute("href") or ""
-                    
-                    if href:
-                        url_cargo = href if href.startswith("http") else "https://www.elempleo.com" + href
-                except Exception:
-                    pass
-                
-                salario_num, salario_text = extraer_salario_robusto(card_text)
-                if "convenir" in card_text.lower():
-                    salario_text = "A convenir"
-                    salario_num = 0
-
-                ubi_card = ciudad.capitalize()
-                try:
-                    el = card.query_selector("span.city, span.location")
-                    if el:
-                        ubi_card = el.inner_text().strip()
-                except Exception:
-                    pass
-
-                resultados.append({
-                    "titulo": titulo,
-                    "empresa": empresa,
-                    "ciudad": ubi_card,
-                    "ubicacion": ubi_card,
-                    "salario_text": salario_text,
-                    "salario_num": salario_num,
-                    "fuente": "ElEmpleo",
-                    "portal": "elempleo",
-                    "url": url_cargo.split("?")[0],
-                    "url_busqueda": url_busqueda,
-                    "descripcion_snippet": card_text[:400],
-                    "descripcion_completa": card_text,
-                    "card_text": card_text,
-                    "fecha_scrape": datetime.now().strftime("%Y-%m-%d %H:%M"),
-                })
-            except Exception:
-                continue
-
-    except Exception as e:
-        print(f"  [EE] Error general: {e}")
-    finally:
-        try:
-            page.close()
-        except Exception:
-            pass
-
+    for card in cards:
+        titulo_elem = card.find("h2", class_="js-job-title") or card.find("a", class_="text-ellipsis")
+        if not titulo_elem:
+            continue
+            
+        titulo = titulo_elem.text.strip()
+        
+        href = ""
+        if titulo_elem.name == "a":
+            href = titulo_elem.get("href", "")
+        elif titulo_elem.find("a"):
+            href = titulo_elem.find("a").get("href", "")
+            
+        link = "https://www.elempleo.com" + href if href.startswith("/") else href
+        
+        empresa_elem = card.find("span", class_="info-company-name")
+        empresa = empresa_elem.text.strip() if empresa_elem else "Empresa Confidencial"
+        
+        ubicacion_elem = card.find("span", class_="info-city")
+        ubicacion = ubicacion_elem.text.strip() if ubicacion_elem else ciudad
+        
+        salario_elem = card.find("span", class_="info-salary")
+        salario_texto = salario_elem.text.strip() if salario_elem else "No indica"
+        
+        desc_elem = card.find("div", class_="description")
+        descripcion = desc_elem.text.strip() if desc_elem else ""
+        
+        resultados.append({
+            "titulo": titulo,
+            "empresa": empresa,
+            "ciudad": ciudad.capitalize(),
+            "ubicacion": ubicacion,
+            "salario_texto": salario_texto,
+            "salario_numerico": 0,
+            "url": link,
+            "descripcion": descripcion
+        })
+        
     return resultados

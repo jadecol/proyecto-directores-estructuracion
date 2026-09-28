@@ -1,0 +1,44 @@
+name: Scraper Diario Directores Estructuracion
+
+on:
+  schedule:
+    # 11:00 UTC = 6:00 AM UTC-5 (Colombia)
+    - cron: '0 11 * * *'
+  workflow_dispatch: # Botón manual en GitHub Actions
+
+permissions:
+  contents: write # Necesario para hacer commit de los Excels generados
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repositorio
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Instalar dependencias
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium
+
+      - name: Ejecutar Extractor y Reportes
+        env:
+          # Para APIs que requieren autenticación, configurar en GitHub Secrets
+          LINKEDIN_COOKIE: ${{ secrets.LINKEDIN_COOKIE }}
+          COMPUTRABAJO_TOKEN: ${{ secrets.COMPUTRABAJO_TOKEN }}
+        run: |
+          python run_diario.py --now
+
+      - name: Commit y Push de los Resultados
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/
+          git commit -m "📊 [Auto] Actualización diaria de vacantes" || echo "No hay cambios nuevos"
+          git push
