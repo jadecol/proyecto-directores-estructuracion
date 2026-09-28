@@ -8,8 +8,12 @@ def generar_dashboard():
     df = pd.read_sql_query("SELECT * FROM ofertas WHERE estado = 'NUEVA' ORDER BY nivel ASC, score_keywords DESC", conn)
     conn.close()
     
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M')
-    file_path = f"data/dashboard_{timestamp}_ROBUSTO.html"
+    # Nombre estático para no generar basura en el repositorio
+    file_path = "data/dashboard_actual.html"
+    
+    # Obtener ciudades únicas para el filtro
+    cities = sorted([c for c in df['ciudad'].dropna().unique() if str(c).strip()]) if not df.empty else []
+    city_options = '<option value="">Todas las Ciudades</option>' + ''.join([f'<option value="{c}">{c}</option>' for c in cities])
     
     html_content = f"""
     <!DOCTYPE html>
@@ -17,68 +21,164 @@ def generar_dashboard():
     <head>
         <meta charset="UTF-8">
         <meta name="referrer" content="no-referrer">
-        <title>Dashboard de Vacantes Estratégicas</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dashboard Corporativo - Vacantes</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {{
+                theme: {{
+                    extend: {{
+                        fontFamily: {{
+                            sans: ['Inter', 'sans-serif'],
+                        }},
+                        colors: {{
+                            navy: {{
+                                800: '#1e3a8a',
+                                900: '#1e3a5f',
+                            }},
+                        }}
+                    }}
+                }}
+            }}
+        </script>
         <style>
-            body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 20px; }}
-            h1 {{ color: #2c3e50; text-align: center; }}
-            .stats {{ display: flex; justify-content: center; gap: 20px; margin-bottom: 30px; }}
-            .stat-box {{ background: white; padding: 15px 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }}
-            .stat-box h3 {{ margin: 0; color: #7f8c8d; font-size: 14px; text-transform: uppercase; }}
-            .stat-box p {{ margin: 10px 0 0 0; font-size: 24px; font-weight: bold; color: #2980b9; }}
-            table {{ width: 100%; border-collapse: collapse; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }}
-            th, td {{ padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }}
-            th {{ background-color: #2980b9; color: white; text-transform: uppercase; font-size: 14px; }}
-            tr:hover {{ background-color: #f1f1f1; }}
-            .nivel-PREMIUM {{ font-weight: bold; color: #d35400; }}
-            .nivel-ALTO {{ font-weight: bold; color: #27ae60; }}
-            .nivel-MEDIO {{ font-weight: bold; color: #f39c12; }}
-            .btn {{ display: inline-block; padding: 6px 12px; background-color: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; }}
-            .btn:hover {{ background-color: #2980b9; }}
+            body {{ font-family: 'Inter', sans-serif; }}
+            .nivel-PREMIUM {{ color: #b45309; background-color: #fef3c7; border-color: #f59e0b; }}
+            .nivel-ALTO {{ color: #15803d; background-color: #dcfce7; border-color: #22c55e; }}
+            .nivel-MEDIO {{ color: #4338ca; background-color: #e0e7ff; border-color: #6366f1; }}
+            .badge {{ display: inline-block; padding: 0.25em 0.75em; font-size: 0.75rem; font-weight: 600; border-radius: 9999px; border-width: 1px; text-align: center; }}
         </style>
     </head>
-    <body>
-        <h1>Reporte de Vacantes (Extraídas Hoy)</h1>
-        
-        <div class="stats">
-            <div class="stat-box"><h3>Total Nuevas</h3><p>{len(df)}</p></div>
-            <div class="stat-box"><h3>PREMIUM</h3><p>{len(df[df['nivel'] == 'PREMIUM']) if not df.empty else 0}</p></div>
-            <div class="stat-box"><h3>ALTO</h3><p>{len(df[df['nivel'] == 'ALTO']) if not df.empty else 0}</p></div>
-        </div>
+    <body class="bg-slate-50 text-slate-800 antialiased">
+        <div class="min-h-screen p-6 md:p-10 max-w-7xl mx-auto">
+            
+            <header class="mb-10">
+                <h1 class="text-3xl font-bold text-navy-900 mb-2">Reporte Ejecutivo de Vacantes</h1>
+                <p class="text-slate-500">Última actualización: {datetime.now().strftime('%Y-%m-%d %H:%M')}</p>
+            </header>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Nivel</th>
-                    <th>Título</th>
-                    <th>Empresa</th>
-                    <th>Ciudad</th>
-                    <th>Salario Extraído</th>
-                    <th>Score</th>
-                    <th>Acción</th>
-                </tr>
-            </thead>
-            <tbody>
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col items-center">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Total Nuevas</h3>
+                    <p class="text-4xl font-bold text-navy-800 mt-2">{len(df)}</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col items-center">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Nivel Premium</h3>
+                    <p class="text-4xl font-bold text-amber-600 mt-2">{len(df[df['nivel'] == 'PREMIUM']) if not df.empty else 0}</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col items-center">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Nivel Alto</h3>
+                    <p class="text-4xl font-bold text-emerald-600 mt-2">{len(df[df['nivel'] == 'ALTO']) if not df.empty else 0}</p>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
+                <div class="flex-1 w-full relative">
+                    <svg class="w-5 h-5 absolute left-3 top-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <input type="text" id="searchInput" placeholder="Buscar por cargo o empresa..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy-800 focus:border-transparent text-sm">
+                </div>
+                <div class="w-full md:w-64">
+                    <select id="citySelect" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy-800 focus:border-transparent text-sm text-slate-600 bg-white cursor-pointer">
+                        {city_options}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse" id="jobsTable">
+                        <thead>
+                            <tr class="bg-slate-100 border-b border-slate-200 text-slate-600 uppercase text-xs tracking-wider">
+                                <th class="px-6 py-4 font-semibold">Portal</th>
+                                <th class="px-6 py-4 font-semibold">Nivel</th>
+                                <th class="px-6 py-4 font-semibold">Título</th>
+                                <th class="px-6 py-4 font-semibold">Empresa</th>
+                                <th class="px-6 py-4 font-semibold">Ciudad</th>
+                                <th class="px-6 py-4 font-semibold">Salario</th>
+                                <th class="px-6 py-4 font-semibold">Score</th>
+                                <th class="px-6 py-4 font-semibold text-center">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-sm">
     """
     
     if not df.empty:
         for _, row in df.iterrows():
+            portal_str = str(row.get('portal', '')).capitalize()
+            if not portal_str:
+                portal_str = str(row.get('origen', '')).capitalize()
+            
+            titulo = str(row.get('titulo', ''))
+            empresa = str(row.get('empresa', ''))
+            ciudad = str(row.get('ciudad', ''))
+            nivel = str(row.get('nivel', ''))
+            salario = row.get('salario_num', 0)
+            score = row.get('score_keywords', 0)
+            url = row.get('url', '#')
+            
             html_content += f"""
-                <tr>
-                    <td class="nivel-{row.get('nivel', '')}">{row.get('nivel', '')}</td>
-                    <td>{row.get('titulo', '')}</td>
-                    <td>{row.get('empresa', '')}</td>
-                    <td>{row.get('ciudad', '')}</td>
-                    <td>${row.get('salario_num', 0):,}</td>
-                    <td>{row.get('score_keywords', 0)}</td>
-                    <td><a href="{row.get('url', '#')}" target="_blank" class="btn">Ver Oferta</a></td>
-                </tr>
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">{portal_str}</td>
+                                <td class="px-6 py-4"><span class="badge nivel-{nivel}">{nivel}</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">{titulo}</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">{empresa}</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">{ciudad}</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">${salario:,}</td>
+                                <td class="px-6 py-4 text-slate-500">{score}</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="{url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
             """
     else:
-        html_content += "<tr><td colspan='7' style='text-align: center;'>No se encontraron vacantes nuevas hoy.</td></tr>"
+        html_content += """
+                            <tr><td colspan="8" class="px-6 py-10 text-center text-slate-500">No se encontraron vacantes nuevas hoy.</td></tr>
+        """
         
     html_content += """
-            </tbody>
-        </table>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const searchInput = document.getElementById('searchInput');
+                const citySelect = document.getElementById('citySelect');
+                const rows = document.querySelectorAll('.job-row');
+
+                function filterTable() {
+                    const searchTerm = searchInput.value.toLowerCase();
+                    const selectedCity = citySelect.value.toLowerCase();
+
+                    rows.forEach(row => {
+                        const title = row.querySelector('.job-title').textContent.toLowerCase();
+                        const company = row.querySelector('.job-company').textContent.toLowerCase();
+                        const city = row.querySelector('.job-city').textContent.toLowerCase();
+
+                        const matchesSearch = title.includes(searchTerm) || company.includes(searchTerm);
+                        const matchesCity = selectedCity === "" || city === selectedCity;
+
+                        if (matchesSearch && matchesCity) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                }
+
+                searchInput.addEventListener('input', filterTable);
+                citySelect.addEventListener('change', filterTable);
+            });
+        </script>
     </body>
     </html>
     """

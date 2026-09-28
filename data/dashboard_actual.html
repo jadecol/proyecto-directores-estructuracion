@@ -1,0 +1,880 @@
+
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="referrer" content="no-referrer">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dashboard Corporativo - Vacantes</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ['Inter', 'sans-serif'],
+                        },
+                        colors: {
+                            navy: {
+                                800: '#1e3a8a',
+                                900: '#1e3a5f',
+                            },
+                        }
+                    }
+                }
+            }
+        </script>
+        <style>
+            body { font-family: 'Inter', sans-serif; }
+            .nivel-PREMIUM { color: #b45309; background-color: #fef3c7; border-color: #f59e0b; }
+            .nivel-ALTO { color: #15803d; background-color: #dcfce7; border-color: #22c55e; }
+            .nivel-MEDIO { color: #4338ca; background-color: #e0e7ff; border-color: #6366f1; }
+            .badge { display: inline-block; padding: 0.25em 0.75em; font-size: 0.75rem; font-weight: 600; border-radius: 9999px; border-width: 1px; text-align: center; }
+        </style>
+    </head>
+    <body class="bg-slate-50 text-slate-800 antialiased">
+        <div class="min-h-screen p-6 md:p-10 max-w-7xl mx-auto">
+            
+            <header class="mb-10">
+                <h1 class="text-3xl font-bold text-navy-900 mb-2">Reporte Ejecutivo de Vacantes</h1>
+                <p class="text-slate-500">Última actualización: 2026-09-28 13:06</p>
+            </header>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col items-center">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Total Nuevas</h3>
+                    <p class="text-4xl font-bold text-navy-800 mt-2">50</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col items-center">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Nivel Premium</h3>
+                    <p class="text-4xl font-bold text-amber-600 mt-2">1</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col items-center">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Nivel Alto</h3>
+                    <p class="text-4xl font-bold text-emerald-600 mt-2">11</p>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
+                <div class="flex-1 w-full relative">
+                    <svg class="w-5 h-5 absolute left-3 top-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <input type="text" id="searchInput" placeholder="Buscar por cargo o empresa..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy-800 focus:border-transparent text-sm">
+                </div>
+                <div class="w-full md:w-64">
+                    <select id="citySelect" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy-800 focus:border-transparent text-sm text-slate-600 bg-white cursor-pointer">
+                        <option value="">Todas las Ciudades</option><option value="Bogota">Bogota</option><option value="Cali">Cali</option><option value="Manizales">Manizales</option><option value="Medellin">Medellin</option><option value="Pereira">Pereira</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse" id="jobsTable">
+                        <thead>
+                            <tr class="bg-slate-100 border-b border-slate-200 text-slate-600 uppercase text-xs tracking-wider">
+                                <th class="px-6 py-4 font-semibold">Portal</th>
+                                <th class="px-6 py-4 font-semibold">Nivel</th>
+                                <th class="px-6 py-4 font-semibold">Título</th>
+                                <th class="px-6 py-4 font-semibold">Empresa</th>
+                                <th class="px-6 py-4 font-semibold">Ciudad</th>
+                                <th class="px-6 py-4 font-semibold">Salario</th>
+                                <th class="px-6 py-4 font-semibold">Score</th>
+                                <th class="px-6 py-4 font-semibold text-center">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-sm">
+    
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-ALTO">ALTO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Gerente comercial Ingeniería Eléctrica</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Empresa del sector Energía Eléctrica</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$10,000,000</td>
+                                <td class="px-6 py-4 text-slate-500">10</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-gerente-comercial-ingenieria-electrica-en-bogota-dc-E63044362B628B8561373E686DCF3405#lc=ListOffers-Score3-1" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-ALTO">ALTO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Gerente comercial</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Empresa del sector Energía Eléctrica</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$10,000,000</td>
+                                <td class="px-6 py-4 text-slate-500">10</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-gerente-comercial-en-bogota-dc-F4C3AAD63DA5B8C361373E686DCF3405#lc=ListOffers-Score3-5" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-ALTO">ALTO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Gerente De Planeación Financiera</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Importante empresa del sector</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$9,500,000</td>
+                                <td class="px-6 py-4 text-slate-500">10</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-gerente-de-planeacion-financiera-en-bogota-dc-4D2DACBC200F3CF761373E686DCF3405#lc=ListOffers-Score3-1" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-ALTO">ALTO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Subgerente de Expansión Bogotá Sur Occidente</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Importante empresa del sector</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$8,000,000</td>
+                                <td class="px-6 py-4 text-slate-500">10</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-subgerente-de-expansion-bogota-sur-occidente-en-bogota-dc-F8A06D0A145DC6F961373E686DCF3405#lc=ListOffers-Score3-7" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-ALTO">ALTO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Subgerencia de Medios Tecnológicos</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">CreSer</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Pereira</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$9,757,000</td>
+                                <td class="px-6 py-4 text-slate-500">10</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-subgerencia-de-medios-tecnologicos-empresa-de-seguridad-pereira-en-pereira-D71E26535059E8E861373E686DCF3405#lc=ListOffers-Score5-2" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-ALTO">ALTO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director Comercial y de Mercadeo</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">CreSer</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Pereira</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$11,500,000</td>
+                                <td class="px-6 py-4 text-slate-500">10</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-director-comercial-y-de-mercadeo-constructora-pereira-en-pereira-7E6297B55F96EEEF61373E686DCF3405#lc=ListOffers-Score5-0" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-ALTO">ALTO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Gerente Comercial y de Mercadeo</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">CreSer</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Pereira</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$11,500,000</td>
+                                <td class="px-6 py-4 text-slate-500">10</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-gerente-comercial-y-de-mercadeo-constructora-pereira-en-pereira-3AABF9E342590A8B61373E686DCF3405#lc=ListOffers-Score5-1" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-ALTO">ALTO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Gerente Regional Comercial Caldas Manizales</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">CreSer</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Manizales</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$9,109,000</td>
+                                <td class="px-6 py-4 text-slate-500">10</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-gerente-regional-comercial-caldas-manizales-empresa-de-seguridad-en-manizales-5F8599F5770A2B0F61373E686DCF3405#lc=ListOffers-Score2-0" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-ALTO">ALTO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Gerente Regional Comercial Caldas Manizales</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">CreSer</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Manizales</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$9,109,000</td>
+                                <td class="px-6 py-4 text-slate-500">10</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-gerente-regional-comercial-caldas-manizales-experiencia-en-empresa-de-seguridad-en-manizales-5A158AFFCEF3AF7E61373E686DCF3405#lc=ListOffers-Score2-1" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-ALTO">ALTO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Gerente Regional Comercial Caldas Manizales</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">CreSer</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Manizales</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$9,109,000</td>
+                                <td class="px-6 py-4 text-slate-500">10</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-gerente-regional-comercial-caldas-manizales-empresa-de-seguridad-en-manizales-5F8599F5770A2B0F61373E686DCF3405#lc=ListOffers-Score5-0" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-ALTO">ALTO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Gerente Regional Comercial Caldas Manizales</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">CreSer</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Manizales</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$9,109,000</td>
+                                <td class="px-6 py-4 text-slate-500">10</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-gerente-regional-comercial-caldas-manizales-experiencia-en-empresa-de-seguridad-en-manizales-5A158AFFCEF3AF7E61373E686DCF3405#lc=ListOffers-Score5-1" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director de Planeación y Desarrollo de Negocios</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">INTERASEO S.A.S E.S.P.</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-director-de-planeacion-y-desarrollo-de-negocios-en-bogota-dc-2195A8FC7C5DA8A161373E686DCF3405#lc=ListOffers-Score3-0" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director/a de Arte – Proyecto Musical</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Importante empresa del sector</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-directora-de-arte-proyecto-musical-en-bogota-dc-71226DF375D535F561373E686DCF3405#lc=ListOffers-Score3-4" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Linkedin</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director(a) Proyecto Fondo Mundial – VIH</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Profamilia Colombia</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.linkedin.com/jobs/view/director-a-proyecto-fondo-mundial-%E2%80%93-vih-at-profamilia-colombia-4463343496" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Linkedin</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director de proyecto</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">SunColombia</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.linkedin.com/jobs/view/director-de-proyecto-at-suncolombia-4469266449" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Linkedin</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director de Estrategia y Ejecución</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">MISSION S.A.S.</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.linkedin.com/jobs/view/director-de-estrategia-y-ejecuci%C3%B3n-at-mission-s-a-s-4467730385" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Linkedin</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director, Agile Delivery 1</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Scotiabank</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.linkedin.com/jobs/view/director-agile-delivery-1-at-scotiabank-4435204910" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Linkedin</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director de obra</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Buenvivir Construcciones</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.linkedin.com/jobs/view/director-de-obra-at-buenvivir-construcciones-4444185727" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Linkedin</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Deputy Director of Programs Colombia</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">International Rescue Committee</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.linkedin.com/jobs/view/deputy-director-of-programs-colombia-at-international-rescue-committee-4454873974" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Linkedin</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director, Agile Delivery</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Scotiabank</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.linkedin.com/jobs/view/director-agile-delivery-at-scotiabank-4416326489" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Gerente de Servicio (Service Delivery Manager)</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Gerente de Servicio (Service Delivery Manager)</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-gerente-de-servicio-service-delivery-manager-scrum-master-en-bogota-dc-CA706F51BF71E7D461373E686DCF3405#lc=ListOffers-Score3-2" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Gerente de Operaciones Comerciales</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Importante empresa del sector</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-gerente-de-operaciones-comerciales-fuerzas-de-venta-multisectoriales-en-bogota-dc-220421134DA2193E61373E686DCF3405#lc=ListOffers-Score3-3" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Gerente Banca Empresarial</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Importante empresa del sector</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-gerente-banca-empresarial-en-bogota-dc-42BD8EDE2237026B61373E686DCF3405#lc=ListOffers-Score3-6" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director de Planeación y Desarrollo de Negocios</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">INTERASEO S.A.S E.S.P.</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-director-de-planeacion-y-desarrollo-de-negocios-en-bogota-dc-2195A8FC7C5DA8A161373E686DCF3405#lc=ListOffers-Score0-13" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Linkedin</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Gerente de proyectos</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Empresa Confidencial</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.linkedin.com/jobs/view/gerente-de-proyectos-at-empresa-confidencial-4472289993" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Linkedin</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director(a) Comercial de Proyectos</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">MR Inversiones</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.linkedin.com/jobs/view/director-a-comercial-de-proyectos-at-mr-inversiones-4467985651" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director de Planeación y Desarrollo de Negocios</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">INTERASEO S.A.S E.S.P.</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-director-de-planeacion-y-desarrollo-de-negocios-en-bogota-dc-2195A8FC7C5DA8A161373E686DCF3405#lc=ListOffers-Score0-3" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Linkedin</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Associate Director - Structural Engineering (Data Centers)</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">AECOM</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.linkedin.com/jobs/view/associate-director-structural-engineering-data-centers-at-aecom-4408930164" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Linkedin</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director Técnico en Mantenimiento Tractocamiones</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">TRANSPORTES PYP</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.linkedin.com/jobs/view/director-t%C3%A9cnico-en-mantenimiento-tractocamiones-at-transportes-pyp-4459177653" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director (a) de proyectos/Vivienda</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Importante Constructora</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-director-a-de-proyectosvivienda-en-bogota-dc-3F77BFD14BFEB9EA61373E686DCF3405#lc=ListOffers-Score0-2" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Gerente de Proyectos</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Importante empresa del sector construcción</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-gerente-de-proyectos-en-bogota-dc-FEE261B0C02E463F61373E686DCF3405#lc=ListOffers-Score0-3" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director Comercial</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">TORO ARIAS TA ASESORES DE SEGUROS CIA LTDA</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Cali</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-director-comercial-comercializadora-de-vehiculos-en-cali-D0DC9DE1E9C6AAB261373E686DCF3405#lc=ListOffers-Score5-2" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director comercial y de Mercadeo</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">TORO ARIAS TA ASESORES DE SEGUROS CIA LTDA</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Cali</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-director-comercial-y-de-mercadeo-en-cali-A3406A99BE6F406B61373E686DCF3405#lc=ListOffers-Score5-3" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director Comercial</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">TORO ARIAS TA ASESORES DE SEGUROS CIA LTDA</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Cali</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-director-comercial-entidad-financiera-en-cali-D70DB9653135E35E61373E686DCF3405#lc=ListOffers-Score5-4" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director Técnico</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">ADMA LABORATORIO SOCIEDAD POR ACCIONES SIMPLIFICADA</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Cali</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-director-tecnico-quimico-farmaceutico-en-cali-D26BD4E3BEF990F061373E686DCF3405#lc=ListOffers-Score5-5" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Elempleo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director(a) de proyectos / villavicencio / meta</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">EFICACIA S.A.S</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Cali</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://www.elempleo.com/co/ofertas-trabajo/directora-de-proyectos-villavicencio-meta-1886772165" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Elempleo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Gerente de oficina cali</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Empresa confidencial</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Cali</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://www.elempleo.com/co/ofertas-trabajo/gerente-de-oficina-cali-1886772195" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Linkedin</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Gerente de Ventas y Mercadeo Construcción</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">LHH</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Cali</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.linkedin.com/jobs/view/gerente-de-ventas-y-mercadeo-construcci%C3%B3n-at-lhh-4467895854" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Linkedin</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Gerente de Zona Andina</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Banco AV Villas</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Cali</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.linkedin.com/jobs/view/gerente-de-zona-andina-at-banco-av-villas-4469211039" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Linkedin</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director Tecnico CDA con moto con experiencia de 6 meses Cali</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Comfenalco Valle delagente</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Cali</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.linkedin.com/jobs/view/director-tecnico-cda-con-moto-con-experiencia-de-6-meses-cali-at-comfenalco-valle-delagente-4466704034" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Elempleo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Gerente de zona - medellin</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Empresa confidencial</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Medellin</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://www.elempleo.com/co/ofertas-trabajo/gerente-de-zona-medellin-1886772393" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Linkedin</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Gerente de Personal - Trabajo Remoto | REF#281508</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">BairesDev</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Medellin</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.linkedin.com/jobs/view/gerente-de-personal-trabajo-remoto-ref%23281508-at-bairesdev-4140199437" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Magneto</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director De Oficina Senior (Finanzas) Barranquilla</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Director De Oficina Senior (Finanzas) Barranquilla</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Medellin</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://www.magneto365.com/co/empleos/director-de-oficina-senior-finanzas-barranquilla-1082121" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Linkedin</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director comercial - Ibis styles Medellín</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">ibis, ibis Styles, ibis budget</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Medellin</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.linkedin.com/jobs/view/director-comercial-ibis-styles-medell%C3%ADn-at-ibis-ibis-styles-ibis-budget-4453907777" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Elempleo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director/a del programa de medicina - pereira</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Empresa confidencial</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Pereira</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://www.elempleo.com/co/ofertas-trabajo/director-a-del-programa-de-medicina-pereira-1886772449" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Linkedin</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director de Obra Ibague</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Constructora Hábitat de los Andes</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Pereira</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.linkedin.com/jobs/view/director-de-obra-ibague-at-constructora-h%C3%A1bitat-de-los-andes-4464472824" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Linkedin</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director Comercial de Proyectos</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">MR Inversiones</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Pereira</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.linkedin.com/jobs/view/director-comercial-de-proyectos-at-mr-inversiones-4449937769" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Linkedin</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Gerente de Mercadeo</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Tecnodiesel SAS</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Pereira</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.linkedin.com/jobs/view/gerente-de-mercadeo-at-tecnodiesel-sas-4457325069" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Linkedin</td>
+                                <td class="px-6 py-4"><span class="badge nivel-MEDIO">MEDIO</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Gerente Comercial Fotovoltaica</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">Energitel Telco</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Pereira</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$0</td>
+                                <td class="px-6 py-4 text-slate-500">5</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.linkedin.com/jobs/view/gerente-comercial-fotovoltaica-at-energitel-telco-4469479821" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                                <td class="px-6 py-4 font-medium text-slate-700">Computrabajo</td>
+                                <td class="px-6 py-4"><span class="badge nivel-PREMIUM">PREMIUM</span></td>
+                                <td class="px-6 py-4 font-semibold text-navy-800 job-title">Director de Nuevos Proyectos</td>
+                                <td class="px-6 py-4 text-slate-600 job-company">OCOBO CONSTRUCCIONES S.A.S</td>
+                                <td class="px-6 py-4 text-slate-500 job-city">Bogota</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">$15,600,000</td>
+                                <td class="px-6 py-4 text-slate-500">10</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-director-de-nuevos-proyectos-sector-construccion-en-bogota-dc-B9CED2F382770B9B61373E686DCF3405#lc=ListOffers-Score0-4" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-navy-800 text-white rounded-lg text-xs font-semibold tracking-wide hover:bg-navy-900 hover:shadow-md transition-all duration-200">
+                                        Ver Oferta
+                                    </a>
+                                </td>
+                            </tr>
+            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const searchInput = document.getElementById('searchInput');
+                const citySelect = document.getElementById('citySelect');
+                const rows = document.querySelectorAll('.job-row');
+
+                function filterTable() {
+                    const searchTerm = searchInput.value.toLowerCase();
+                    const selectedCity = citySelect.value.toLowerCase();
+
+                    rows.forEach(row => {
+                        const title = row.querySelector('.job-title').textContent.toLowerCase();
+                        const company = row.querySelector('.job-company').textContent.toLowerCase();
+                        const city = row.querySelector('.job-city').textContent.toLowerCase();
+
+                        const matchesSearch = title.includes(searchTerm) || company.includes(searchTerm);
+                        const matchesCity = selectedCity === "" || city === selectedCity;
+
+                        if (matchesSearch && matchesCity) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                }
+
+                searchInput.addEventListener('input', filterTable);
+                citySelect.addEventListener('change', filterTable);
+            });
+        </script>
+    </body>
+    </html>
+    
