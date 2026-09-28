@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.env
+.venv/
+venv/
+playwright/
+node_modules/
+.DS_Store
+
+# Outputs generados — se excluyen del repo
+data/*.xlsx
+data/*.html
+
+# Pero conservamos el ejemplo de referencia OCOBO
+!data/ejemplo_OCOBO.xlsx
