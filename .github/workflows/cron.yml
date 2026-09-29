@@ -34,11 +34,12 @@ jobs:
           COMPUTRABAJO_TOKEN: ${{ secrets.COMPUTRABAJO_TOKEN }}
         run: |
           python -m scraper.main_multi
+          python -m scraper.dashboard_generator
 
       - name: Commit y Push de los Resultados
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add data/
-          git commit -m "📊 [Auto] Actualización diaria de vacantes" || echo "No hay cambios nuevos"
+          git add data/ index.html
+          git commit -m "📊 [Auto] Actualización diaria de vacantes y dashboard" || echo "No hay cambios nuevos"
           git push
