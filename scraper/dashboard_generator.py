@@ -9,7 +9,7 @@ def generar_dashboard():
     conn.close()
     
     # Nombre estático para no generar basura en el repositorio
-    file_path = "data/dashboard_actual.html"
+    file_path = "index.html"
     
     # Obtener ciudades únicas para el filtro
     cities = sorted([c for c in df['ciudad'].dropna().unique() if str(c).strip()]) if not df.empty else []
